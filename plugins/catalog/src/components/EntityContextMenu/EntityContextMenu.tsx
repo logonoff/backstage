@@ -103,22 +103,55 @@ export function EntityContextMenu(props: EntityContextMenuProps) {
     }
   }, [copyState, alertApi, t]);
 
-  const extraItems = UNSTABLE_extraContextMenuItems && [
-    ...UNSTABLE_extraContextMenuItems.map(item => (
-      <MenuItem
-        key={item.title}
-        onClick={() => {
-          onClose();
-          item.onClick();
-        }}
-      >
-        <ListItemIcon>
-          <item.Icon fontSize="small" />
-        </ListItemIcon>
-        <ListItemText primary={item.title} />
-      </MenuItem>
-    )),
-    <Divider key="the divider is here!" />,
+  const extraItems = UNSTABLE_extraContextMenuItems?.length
+    ? [
+        ...UNSTABLE_extraContextMenuItems.map(item => (
+          <MenuItem
+            key={item.title}
+            onClick={() => {
+              onClose();
+              item.onClick();
+            }}
+          >
+            <ListItemIcon>
+              <item.Icon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText primary={item.title} />
+          </MenuItem>
+        )),
+        <Divider key="the divider is here!" />,
+      ]
+    : undefined;
+
+  const defaultMenuItems = [
+    <UnregisterEntity
+      unregisterEntityOptions={UNSTABLE_contextMenuOptions}
+      isUnregisterAllowed={isAllowed}
+      onUnregisterEntity={onUnregisterEntity}
+      onClose={onClose}
+    />,
+    <MenuItem
+      onClick={() => {
+        onClose();
+        onInspectEntity();
+      }}
+    >
+      <ListItemIcon>
+        <BugReportIcon fontSize="small" />
+      </ListItemIcon>
+      <ListItemText primary={t('entityContextMenu.inspectMenuTitle')} />
+    </MenuItem>,
+    <MenuItem
+      onClick={() => {
+        onClose();
+        copyToClipboard(window.location.toString());
+      }}
+    >
+      <ListItemIcon>
+        <FileCopyTwoToneIcon fontSize="small" />
+      </ListItemIcon>
+      <ListItemText primary={t('entityContextMenu.copyURLMenuTitle')} />
+    </MenuItem>,
   ];
 
   return (
@@ -152,40 +185,7 @@ export function EntityContextMenu(props: EntityContextMenuProps) {
         <MenuList autoFocusItem={Boolean(anchorEl)}>
           {extraItems}
           {contextMenuItems === undefined ? (
-            <>
-              <UnregisterEntity
-                unregisterEntityOptions={UNSTABLE_contextMenuOptions}
-                isUnregisterAllowed={isAllowed}
-                onUnregisterEntity={onUnregisterEntity}
-                onClose={onClose}
-              />
-              <MenuItem
-                onClick={() => {
-                  onClose();
-                  onInspectEntity();
-                }}
-              >
-                <ListItemIcon>
-                  <BugReportIcon fontSize="small" />
-                </ListItemIcon>
-                <ListItemText
-                  primary={t('entityContextMenu.inspectMenuTitle')}
-                />
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  onClose();
-                  copyToClipboard(window.location.toString());
-                }}
-              >
-                <ListItemIcon>
-                  <FileCopyTwoToneIcon fontSize="small" />
-                </ListItemIcon>
-                <ListItemText
-                  primary={t('entityContextMenu.copyURLMenuTitle')}
-                />
-              </MenuItem>
-            </>
+            defaultMenuItems
           ) : (
             <EntityContextMenuProvider onMenuClose={onClose}>
               {contextMenuItems}
